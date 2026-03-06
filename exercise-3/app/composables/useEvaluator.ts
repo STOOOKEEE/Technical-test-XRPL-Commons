@@ -19,8 +19,13 @@ export function useEvaluator() {
       result.value = response
     }
     catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to evaluate idea'
-      error.value = message
+      if (err && typeof err === 'object' && 'data' in err) {
+        const fetchError = err as { data?: { statusMessage?: string } }
+        error.value = fetchError.data?.statusMessage || 'Failed to evaluate idea'
+      }
+      else {
+        error.value = err instanceof Error ? err.message : 'Failed to evaluate idea'
+      }
     }
     finally {
       isLoading.value = false

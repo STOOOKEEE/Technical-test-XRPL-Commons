@@ -24,12 +24,14 @@ async function handleSubmit() {
       <textarea
         v-model="idea"
         rows="5"
+        :maxlength="2000"
         placeholder="Describe your business idea here..."
         class="w-full bg-#111 border border-#222 text-white px-4 py-3 focus:outline-none focus:border-white placeholder-#888 resize-none"
         :disabled="isLoading"
         @keydown.meta.enter="handleSubmit"
         @keydown.ctrl.enter="handleSubmit"
       />
+      <span class="text-xs text-#888 self-end">{{ idea.length }}/2000</span>
 
       <button
         :disabled="isLoading || !idea.trim()"

@@ -1,5 +1,7 @@
 import OpenAI from 'openai'
-import type { IEvaluationResult } from '~/types'
+import type { IEvaluationRequest, IEvaluationResult } from '~/types'
+
+const MAX_IDEA_LENGTH = 2000
 
 const SYSTEM_PROMPT = `You are a business idea evaluator. The user will describe a business idea.
 You must analyze it and return ONLY a valid JSON object with this exact structure:
@@ -12,11 +14,14 @@ Rules:
 - Do NOT wrap the JSON in markdown code blocks`
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const { idea } = body
+  const { idea } = await readBody<IEvaluationRequest>(event)
 
   if (!idea || typeof idea !== 'string' || idea.trim().length === 0) {
     throw createError({ statusCode: 400, statusMessage: 'Missing or empty idea' })
+  }
+
+  if (idea.length > MAX_IDEA_LENGTH) {
+    throw createError({ statusCode: 400, statusMessage: `Idea must be ${MAX_IDEA_LENGTH} characters or less` })
   }
 
   const config = useRuntimeConfig()
@@ -34,6 +39,7 @@ export default defineEventHandler(async (event) => {
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: idea },
       ],
+      response_format: { type: 'json_object' },
       temperature: 0.7,
       max_tokens: 200,
     })
