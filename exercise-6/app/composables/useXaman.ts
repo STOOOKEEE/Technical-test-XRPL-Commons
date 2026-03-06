@@ -1,51 +1,11 @@
-import type { IPaymentResult } from '~/types'
-import { XRPL_EXPLORER_BASE_URL } from '~/utils/constants'
+import type { INftMintResult, IXummSdk, IXummEvent } from '~/types'
+import { XRPL_EXPLORER_BASE_URL, SESSION_CHECK_TIMEOUT_MS } from '~/utils/constants'
 
 declare global {
   interface Window {
-    Xumm: new (apiKey: string) => XummSdk
+    Xumm: new (apiKey: string) => IXummSdk
   }
 }
-
-interface XummSdk {
-  authorize: () => Promise<void>
-  logout: () => void
-  user: {
-    account: Promise<string | undefined>
-  }
-  payload: {
-    create: (payload: Record<string, unknown>) => Promise<XummCreated>
-    get: (uuid: string) => Promise<XummPayload>
-    createAndSubscribe: (
-      payload: Record<string, unknown>,
-      callback: (event: XummEvent) => XummEvent | undefined
-    ) => Promise<{ created: XummCreated; resolved: Promise<unknown> }>
-  }
-}
-
-interface XummEvent {
-  data: Record<string, unknown>
-}
-
-interface XummCreated {
-  uuid: string
-  next: { always: string }
-  refs: { qr_png: string }
-}
-
-interface XummPayload {
-  meta: { resolved: boolean; signed: boolean }
-  response: { txid: string; dispatched_result: string }
-}
-
-let xummSingleton: XummSdk | null = null
-
-const walletAddress = ref<string | null>(null)
-const isConnecting = ref(false)
-const isMinting = ref(false)
-const error = ref<string | null>(null)
-const mintResult = ref<IPaymentResult | null>(null)
-const qrUrl = ref<string | null>(null)
 
 function stringToHex(str: string): string {
   return Array.from(new TextEncoder().encode(str))
@@ -54,10 +14,20 @@ function stringToHex(str: string): string {
     .toUpperCase()
 }
 
+// Global state — persists across page navigations
+let xummSingleton: IXummSdk | null = null
+
+const walletAddress = ref<string | null>(null)
+const isConnecting = ref(false)
+const isMinting = ref(false)
+const error = ref<string | null>(null)
+const mintResult = ref<INftMintResult | null>(null)
+const qrUrl = ref<string | null>(null)
+
 export function useXaman() {
   const config = useRuntimeConfig()
 
-  function initSdk(): XummSdk {
+  function initSdk(): IXummSdk {
     if (!xummSingleton) {
       if (typeof window === 'undefined' || !window.Xumm) {
         throw new Error('Xaman SDK not loaded')
@@ -72,18 +42,11 @@ export function useXaman() {
     error.value = null
 
     try {
-      if (!xummSingleton) {
-        if (typeof window === 'undefined' || !window.Xumm) {
-          throw new Error('Xaman SDK not loaded')
-        }
-        xummSingleton = new window.Xumm(config.public.xamanApiKey)
-      }
-
-      const sdk = xummSingleton
+      const sdk = initSdk()
 
       const existingAccount = await Promise.race([
         sdk.user.account,
-        new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), 2000)),
+        new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), SESSION_CHECK_TIMEOUT_MS)),
       ])
       if (existingAccount) {
         walletAddress.value = existingAccount
@@ -122,7 +85,7 @@ export function useXaman() {
         Flags: 8,
         TransferFee: 0,
         URI: uri,
-      }, (eventMessage: XummEvent) => {
+      }, (eventMessage: IXummEvent) => {
         if (eventMessage.data && typeof eventMessage.data.signed === 'boolean') {
           return eventMessage
         }
