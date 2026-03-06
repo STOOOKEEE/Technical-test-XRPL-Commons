@@ -1,0 +1,28 @@
+{
+  "name": "exercise-5",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@unocss/nuxt": "^66.6.6-beta.1",
+    "@unocss/preset-typography": "^66.6.6-beta.1",
+    "@unocss/preset-uno": "^66.6.6-beta.1",
+    "@unocss/preset-web-fonts": "^66.6.6",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0",
+    "nuxt": "^4.3.1",
+    "vue": "^3.5.29",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9"
+  }
+}
