@@ -1,0 +1,21 @@
+{
+  "name": "nuxt-app",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@unocss/nuxt": "^66.6.6",
+    "@unocss/preset-typography": "^66.6.6",
+    "@unocss/preset-uno": "^66.6.6",
+    "@unocss/preset-web-fonts": "^66.6.6",
+    "nuxt": "^4.3.1",
+    "vue": "^3.5.29",
+    "vue-router": "^4.6.4"
+  }
+}
