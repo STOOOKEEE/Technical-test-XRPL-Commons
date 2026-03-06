@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { getCommentsCollection } from '../../../utils/db'
-import { MAX_CONTENT_LENGTH } from '../../../utils/constants'
+import { MAX_CONTENT_LENGTH } from '~~/shared/constants'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')

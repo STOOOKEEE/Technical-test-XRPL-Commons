@@ -1,5 +1,5 @@
 import { verifyToken } from '../utils/auth'
-import { JWT_COOKIE_NAME } from '../utils/constants'
+import { JWT_COOKIE_NAME } from '~~/shared/constants'
 
 export default defineEventHandler((event) => {
   const url = getRequestURL(event)

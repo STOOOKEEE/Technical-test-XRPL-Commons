@@ -1,9 +1,10 @@
 import { getDb } from '../../utils/db'
 import { comparePassword, signToken } from '../../utils/auth'
-import { JWT_COOKIE_NAME, JWT_EXPIRY_SECONDS } from '../../utils/constants'
+import { JWT_COOKIE_NAME, JWT_EXPIRY_SECONDS } from '~~/shared/constants'
+import type { ILoginInput } from '~~/types'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBody<ILoginInput>(event)
 
   if (!body?.email || !body?.password) {
     throw createError({
@@ -34,7 +35,7 @@ export default defineEventHandler(async (event) => {
 
   setCookie(event, JWT_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: JWT_EXPIRY_SECONDS,
     path: '/',

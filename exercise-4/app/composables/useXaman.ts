@@ -1,45 +1,14 @@
-import type { IPaymentResult } from '~/types'
-import { XRPL_EXPLORER_BASE_URL, DROPS_PER_XRP } from '~/utils/constants'
+import type { IPaymentResult, IXummSdk } from '~/types'
+import { XRPL_EXPLORER_BASE_URL, DROPS_PER_XRP, SESSION_CHECK_TIMEOUT_MS } from '~/utils/constants'
 
 declare global {
   interface Window {
-    Xumm: new (apiKey: string) => XummSdk
+    Xumm: new (apiKey: string) => IXummSdk
   }
-}
-
-interface XummSdk {
-  authorize: () => Promise<void>
-  logout: () => void
-  user: {
-    account: Promise<string | undefined>
-  }
-  payload: {
-    create: (payload: Record<string, unknown>) => Promise<XummCreated>
-    get: (uuid: string) => Promise<XummPayload>
-    createAndSubscribe: (
-      payload: Record<string, unknown>,
-      callback: (event: XummEvent) => XummEvent | undefined
-    ) => Promise<{ created: XummCreated; resolved: Promise<unknown> }>
-  }
-}
-
-interface XummEvent {
-  data: Record<string, unknown>
-}
-
-interface XummCreated {
-  uuid: string
-  next: { always: string }
-  refs: { qr_png: string }
-}
-
-interface XummPayload {
-  meta: { resolved: boolean; signed: boolean }
-  response: { txid: string; dispatched_result: string }
 }
 
 // Global state — persists across page navigations
-let xummSingleton: XummSdk | null = null
+let xummSingleton: IXummSdk | null = null
 
 const walletAddress = ref<string | null>(null)
 const isConnecting = ref(false)
@@ -51,7 +20,7 @@ const qrUrl = ref<string | null>(null)
 export function useXaman() {
   const config = useRuntimeConfig()
 
-  function initSdk(): XummSdk {
+  function initSdk(): IXummSdk {
     if (!xummSingleton) {
       if (typeof window === 'undefined' || !window.Xumm) {
         throw new Error('Xaman SDK not loaded')
@@ -66,20 +35,12 @@ export function useXaman() {
     error.value = null
 
     try {
-      // Always create a fresh SDK instance for connect to avoid stale session issues
-      if (!xummSingleton) {
-        if (typeof window === 'undefined' || !window.Xumm) {
-          throw new Error('Xaman SDK not loaded')
-        }
-        xummSingleton = new window.Xumm(config.public.xamanApiKey)
-      }
-
-      const sdk = xummSingleton
+      const sdk = initSdk()
 
       // Check for existing session (with timeout to avoid hanging)
       const existingAccount = await Promise.race([
         sdk.user.account,
-        new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), 2000)),
+        new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), SESSION_CHECK_TIMEOUT_MS)),
       ])
       if (existingAccount) {
         walletAddress.value = existingAccount
@@ -117,7 +78,7 @@ export function useXaman() {
         TransactionType: 'Payment',
         Destination: destination,
         Amount: amountDrops,
-      }, (eventMessage: XummEvent) => {
+      }, (eventMessage) => {
         if (eventMessage.data && typeof eventMessage.data.signed === 'boolean') {
           return eventMessage
         }

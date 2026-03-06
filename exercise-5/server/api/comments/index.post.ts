@@ -1,8 +1,9 @@
 import { getCommentsCollection } from '../../utils/db'
-import { MAX_AUTHOR_LENGTH, MAX_CONTENT_LENGTH } from '../../utils/constants'
+import { MAX_AUTHOR_LENGTH, MAX_CONTENT_LENGTH } from '~~/shared/constants'
+import type { ICommentInput } from '~~/types'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBody<ICommentInput>(event)
 
   if (!body?.author || !body?.content) {
     throw createError({

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import type { IAuthPayload } from '~~/types'
 
-import { BCRYPT_SALT_ROUNDS } from './constants'
+import { BCRYPT_SALT_ROUNDS } from '~~/shared/constants'
 
 export function signToken(email: string): string {
   const config = useRuntimeConfig()

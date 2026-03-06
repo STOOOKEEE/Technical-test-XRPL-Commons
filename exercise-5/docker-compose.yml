@@ -12,11 +12,11 @@ services:
     command: sh -c "npm install && npx nuxt dev --host 0.0.0.0"
     environment:
       - NODE_ENV=development
-      - JWT_SECRET=${JWT_SECRET:-super-secret-dev-key}
-      - JWT_EXPIRY=${JWT_EXPIRY:-3600}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@exercise5.com}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123456}
-      - MONGODB_URI=mongodb://mongo:27017/exercise5
+      - NUXT_JWT_SECRET=${NUXT_JWT_SECRET:-super-secret-dev-key}
+      - NUXT_JWT_EXPIRY=${NUXT_JWT_EXPIRY:-3600}
+      - NUXT_ADMIN_EMAIL=${NUXT_ADMIN_EMAIL:-admin@exercise5.com}
+      - NUXT_ADMIN_PASSWORD=${NUXT_ADMIN_PASSWORD:-admin123456}
+      - NUXT_MONGODB_URI=mongodb://mongo:27017/exercise5
     depends_on:
       mongo:
         condition: service_healthy

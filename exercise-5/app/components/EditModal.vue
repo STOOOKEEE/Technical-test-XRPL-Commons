@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MAX_CONTENT_LENGTH } from '~~/app/utils/constants'
+import { MAX_CONTENT_LENGTH } from '~~/shared/constants'
 
 interface Props {
   visible: boolean
@@ -14,11 +14,19 @@ const emit = defineEmits<{
 }>()
 
 const content = ref(props.initialContent)
-const saving = ref(false)
 const modalRef = ref<HTMLElement | null>(null)
 
 watch(() => props.initialContent, (val) => {
   content.value = val
+})
+
+watch(() => props.visible, (val) => {
+  if (val) {
+    document.addEventListener('keydown', handleKeydown)
+  }
+  else {
+    document.removeEventListener('keydown', handleKeydown)
+  }
 })
 
 function handleBackdropClick(e: MouseEvent) {
@@ -48,16 +56,10 @@ function trapFocus(e: KeyboardEvent) {
   }
 }
 
-async function handleSave() {
+function handleSave() {
   if (!content.value.trim()) return
-  saving.value = true
   emit('save', content.value.trim())
-  saving.value = false
 }
-
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
-})
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
@@ -68,7 +70,7 @@ onUnmounted(() => {
   <Teleport to="body">
     <div
       v-if="props.visible"
-      class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-6"
+      :style="{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.8)' }"
       @click="handleBackdropClick"
     >
       <div ref="modalRef" class="bg-#111 border border-#222 p-6 w-full max-w-lg flex flex-col gap-4">
@@ -95,11 +97,11 @@ onUnmounted(() => {
             Cancel
           </button>
           <button
-            :disabled="saving || !content.trim()"
+            :disabled="!content.trim()"
             class="px-6 py-3 bg-white text-black font-semibold hover:bg-#eee active:bg-#ccc disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150"
             @click="handleSave"
           >
-            {{ saving ? '...' : 'Save' }}
+            Save
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MAX_AUTHOR_LENGTH, MAX_CONTENT_LENGTH } from '~~/app/utils/constants'
+import { MAX_AUTHOR_LENGTH, MAX_CONTENT_LENGTH } from '~~/shared/constants'
 
 const emit = defineEmits<{
   submitted: []

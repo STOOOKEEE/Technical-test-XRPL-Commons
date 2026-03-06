@@ -7,11 +7,11 @@ export default defineNuxtConfig({
     port: 3000,
   },
   runtimeConfig: {
-    jwtSecret: process.env.JWT_SECRET ?? '',
-    jwtExpiry: process.env.JWT_EXPIRY ?? '3600',
-    adminEmail: process.env.ADMIN_EMAIL ?? '',
-    adminPassword: process.env.ADMIN_PASSWORD ?? '',
-    mongodbUri: process.env.MONGODB_URI ?? 'mongodb://mongo:27017/exercise5',
+    jwtSecret: '',
+    jwtExpiry: '3600',
+    adminEmail: '',
+    adminPassword: '',
+    mongodbUri: 'mongodb://mongo:27017/exercise5',
   },
   vite: {
     server: {
